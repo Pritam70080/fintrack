@@ -1,8 +1,8 @@
 package com.example.fintrack.controller;
 
-import com.example.fintrack.dto.expense.CreateExpenseRequestDto;
-import com.example.fintrack.dto.expense.ExpenseResponseDto;
-import com.example.fintrack.dto.expense.UpdateExpenseRequestDto;
+import com.example.fintrack.dto.expense.CreateExpenseRequest;
+import com.example.fintrack.dto.expense.ExpenseResponse;
+import com.example.fintrack.dto.expense.UpdateExpenseRequest;
 import com.example.fintrack.service.ExpenseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,22 +19,22 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @PostMapping
-    public ResponseEntity<ExpenseResponseDto> createExpense(
+    public ResponseEntity<ExpenseResponse> createExpense(
             @RequestParam Long userId,
-            @Valid @RequestBody CreateExpenseRequestDto request
+            @Valid @RequestBody CreateExpenseRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(expenseService.createExpense(userId, request));
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponseDto>> getUserExpenses(
+    public ResponseEntity<List<ExpenseResponse>> getUserExpenses(
             @RequestParam Long userId
     ) {
         return ResponseEntity.ok(expenseService.getUserExpenses(userId));
     }
 
     @GetMapping("/{expenseId}")
-    public ResponseEntity<ExpenseResponseDto> getExpense(
+    public ResponseEntity<ExpenseResponse> getExpense(
             @RequestParam Long userId,
             @PathVariable Long expenseId
     ) {
@@ -42,10 +42,10 @@ public class ExpenseController {
     }
 
     @PutMapping("/{expenseId}")
-    public ResponseEntity<ExpenseResponseDto> updateExpense(
+    public ResponseEntity<ExpenseResponse> updateExpense(
             @RequestParam Long userId,
             @PathVariable Long expenseId,
-            @Valid @RequestBody UpdateExpenseRequestDto request
+            @Valid @RequestBody UpdateExpenseRequest request
     ) {
         return ResponseEntity.ok(expenseService.updateExpense(
                 userId,

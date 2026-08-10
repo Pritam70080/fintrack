@@ -1,10 +1,12 @@
 package com.example.fintrack.service;
 
-import com.example.fintrack.dto.expense.CreateExpenseRequestDto;
-import com.example.fintrack.dto.expense.ExpenseResponseDto;
-import com.example.fintrack.dto.expense.UpdateExpenseRequestDto;
+import com.example.fintrack.dto.expense.CreateExpenseRequest;
+import com.example.fintrack.dto.expense.ExpenseResponse;
+import com.example.fintrack.dto.expense.UpdateExpenseRequest;
 import com.example.fintrack.entity.Expense;
 import com.example.fintrack.entity.User;
+import com.example.fintrack.exception.ResourceNotFoundException;
+import com.example.fintrack.exception.UnauthorizedException;
 import com.example.fintrack.repository.ExpenseRepository;
 import com.example.fintrack.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +20,11 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
 
-    public ExpenseResponseDto createExpense(Long userId, CreateExpenseRequestDto request) {
+    public ExpenseResponse createExpense(Long userId, CreateExpenseRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found")
+                        new ResourceNotFoundException("User not found with id: " + userId)
                 );
 
         Expense expense = Expense.builder()
@@ -39,7 +41,7 @@ public class ExpenseService {
         return mapToResponse(savedExpense);
     }
 
-    public List<ExpenseResponseDto> getUserExpenses(Long userId) {
+    public List<ExpenseResponse> getUserExpenses(Long userId) {
 
         return expenseRepository.findByUserId(userId)
                 .stream()
@@ -47,15 +49,15 @@ public class ExpenseService {
                 .toList();
     }
 
-    public ExpenseResponseDto getExpense(Long userId, Long expenseId) {
+    public ExpenseResponse getExpense(Long userId, Long expenseId) {
 
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() ->
-                        new RuntimeException("Expense not found")
+                        new ResourceNotFoundException("Expense not found with id: " + expenseId)
                 );
 
         if (!expense.getUser().getId().equals(userId)) {
-            throw new RuntimeException(
+            throw new UnauthorizedException(
                     "You are not allowed to access this expense"
             );
         }
@@ -63,15 +65,15 @@ public class ExpenseService {
         return mapToResponse(expense);
     }
 
-    public ExpenseResponseDto updateExpense(Long userId, Long expenseId, UpdateExpenseRequestDto request) {
+    public ExpenseResponse updateExpense(Long userId, Long expenseId, UpdateExpenseRequest request) {
 
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() ->
-                        new RuntimeException("Expense not found")
+                        new ResourceNotFoundException("Expense not found with id: " + expenseId)
                 );
 
         if (!expense.getUser().getId().equals(userId)) {
-            throw new RuntimeException(
+            throw new UnauthorizedException(
                     "You are not allowed to update this expense"
             );
         }
@@ -91,11 +93,11 @@ public class ExpenseService {
 
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() ->
-                        new RuntimeException("Expense not found")
+                        new ResourceNotFoundException("Expense not found with id: " + expenseId)
                 );
 
         if (!expense.getUser().getId().equals(userId)) {
-            throw new RuntimeException(
+            throw new UnauthorizedException(
                     "You are not allowed to delete this expense"
             );
         }
@@ -103,9 +105,9 @@ public class ExpenseService {
         expenseRepository.delete(expense);
     }
 
-    private ExpenseResponseDto mapToResponse(Expense expense) {
+    private ExpenseResponse mapToResponse(Expense expense) {
 
-        return new ExpenseResponseDto(
+        return new ExpenseResponse(
                 expense.getId(),
                 expense.getTitle(),
                 expense.getDescription(),

@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateExpenseRequestDto {
+public class UpdateExpenseRequest {
     @NotBlank(message = "Title is required")
     private String title;
 
