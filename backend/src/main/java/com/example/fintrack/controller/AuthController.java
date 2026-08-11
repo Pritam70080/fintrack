@@ -66,4 +66,15 @@ public class AuthController {
                 )
         );
     }
+    @GetMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        true,
+                        "Logout successful",
+                        null
+                )
+        );
+    }
 }
