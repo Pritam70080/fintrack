@@ -24,6 +24,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler
+            oAuth2AuthenticationFailureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -49,9 +52,19 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/auth/verify-email"
+                                "/auth/verify-email",
+                                "/oauth2/**",
+                                "/login/**"
                         ).permitAll()
                         .anyRequest().authenticated()
+                ).oauth2Login(oauth2 ->
+                        oauth2
+                                .successHandler(
+                                        oAuth2AuthenticationSuccessHandler
+                                )
+                                .failureHandler(
+                                        oAuth2AuthenticationFailureHandler
+                                )
                 ).addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
