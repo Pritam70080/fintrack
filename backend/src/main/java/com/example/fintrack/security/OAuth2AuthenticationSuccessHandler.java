@@ -39,7 +39,7 @@ public class OAuth2AuthenticationSuccessHandler
 
         response.sendRedirect(
                 frontendUrl
-                        + "/oauth2/success?token="
+                        + "/oauth2/success#token="
                         + loginResponse.getAccessToken()
         );
     }

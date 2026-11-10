@@ -1,16 +1,21 @@
-# React + Vite
+# Fintrack frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Responsive React app for the Fintrack Spring Boot API. The public home page at `/` introduces the product with a responsive bento feature grid and clear sign-up links. It includes Zod-validated React Hook Form auth and expense flows, email/password and Google sign-in, email verification, expense management, Recharts spending insights, spring animations, and persistent light/dark green themes. Routed screens live in `src/pages`, reusable UI lives in `src/components`, and hooks and helpers live in `src/lib`.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```sh
+npm install
+npm run dev
+```
 
-## React Compiler
+By default, Vite proxies `/api/v1` requests to `http://localhost:8000`, matching the backend's port and context path. Set `VITE_API_URL` to an absolute API base URL when connecting to a deployed backend.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The backend must be running with its database and mail settings configured. Set `FRONTEND_URL` to the frontend's exact origin (for local development, `http://localhost:5173`) so backend CORS permits API requests and OAuth can redirect back to the app. Google sign-in also requires valid `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` values and a matching Google OAuth redirect URI for the backend's `/api/v1/login/oauth2/code/google` callback.
 
-## Expanding the ESLint configuration
+## Checks
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```sh
+npm run lint
+npm run build
+```

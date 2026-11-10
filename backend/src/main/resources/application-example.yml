@@ -44,7 +44,7 @@ spring:
 app:
   mail:
     from: ${MAIL_USERNAME}
-  frontend-url: http://localhost:5173
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
   jwt:
     secret: ${JWT_SECRET}
     expiration: 86400000
