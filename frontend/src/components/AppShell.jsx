@@ -29,7 +29,7 @@ function Sidebar({ open, onNavigate, onNotice }) {
     <motion.aside
       animate={{ x: open ? 0 : undefined }}
       transition={springGentle}
-      className={`fixed inset-y-0 left-0 z-40 flex w-[270px] flex-col border-r border-line bg-panel p-4 transition-transform md:static md:z-auto md:w-[250px] md:translate-x-0 md:p-5 ${open ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:shadow-none'}`}
+      className={`fixed inset-y-0 left-0 z-40 flex h-screen w-[270px] flex-col overflow-y-auto border-r border-line bg-panel p-4 transition-transform md:static md:z-auto md:h-full md:w-[250px] md:translate-x-0 md:p-5 ${open ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:shadow-none'}`}
     >
       <Brand />
       <div className="mt-9 flex items-center gap-3 rounded-2xl border border-line bg-page p-3">
@@ -57,7 +57,9 @@ function Sidebar({ open, onNavigate, onNotice }) {
         <button type="button" onClick={() => onNotice('Settings are coming soon.')} className="flex items-center gap-3 rounded-xl px-2 py-2 text-left text-xs text-ink-soft hover:bg-page"><Settings2 size={17} />Settings</button>
       </div>
       <div className="flex items-center gap-3 pt-4">
-        <span className="grid size-9 place-items-center rounded-full bg-primary-500/10 text-sm font-bold text-primary-800 dark:text-primary-300">{user?.name?.charAt(0)?.toUpperCase() || 'Y'}</span>
+        {user?.profileImage
+          ? <img src={user.profileImage} alt="" referrerPolicy="no-referrer" className="size-9 rounded-full object-cover" />
+          : <span className="grid size-9 place-items-center rounded-full bg-primary-500/10 text-sm font-bold text-primary-800 dark:text-primary-300">{user?.name?.charAt(0)?.toUpperCase() || 'Y'}</span>}
         <span className="min-w-0 flex-1"><strong className="block truncate text-xs text-ink">{user?.name || 'Your account'}</strong><small className="mt-0.5 block truncate text-[10px] text-ink-muted">{user?.email || 'Fintrack member'}</small></span>
         <button type="button" aria-label="Sign out" onClick={signOut} className="grid size-8 place-items-center rounded-lg text-ink-muted hover:bg-page hover:text-ink"><LogOut size={16} /></button>
       </div>
@@ -77,10 +79,10 @@ function Topbar({ theme, setTheme, onMenu, onNotice }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-line bg-panel/95 px-4 backdrop-blur md:px-8">
-      <div className="flex items-center gap-3">
+    <header className="relative z-20 flex h-16 shrink-0 items-center justify-between border-b border-line bg-panel/95 px-3 backdrop-blur sm:px-4 md:px-8">
+      <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <button type="button" aria-label="Open menu" onClick={onMenu} className="grid size-9 place-items-center rounded-xl text-ink-soft hover:bg-page md:hidden"><Menu size={19} /></button>
-        <p className="text-xs text-ink-muted">Workspace <span className="mx-1.5 text-line">/</span><strong className="font-semibold text-ink-soft">{currentPage}</strong></p>
+        <p className="truncate text-xs text-ink-muted">Workspace <span className="mx-1 text-line sm:mx-1.5">/</span><strong className="font-semibold text-ink-soft">{currentPage}</strong></p>
       </div>
       <div className="flex items-center gap-2">
         <form onSubmit={search} className="hidden h-9 items-center gap-2 rounded-xl border border-line bg-page px-3 text-ink-muted sm:flex">
@@ -105,16 +107,18 @@ export default function AppShell() {
   }, [fetchExpenses])
 
   return (
-    <div className="min-h-screen bg-page font-sans text-ink md:flex">
+    <div className="flex h-screen overflow-hidden bg-page font-sans text-ink">
       <Sidebar open={mobileMenuOpen} onNavigate={() => setMobileMenuOpen(false)} onNotice={setNotice} />
       {mobileMenuOpen && <button aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-30 bg-ink/35 md:hidden" />}
-      <div className="min-w-0 flex-1">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <Topbar theme={theme} setTheme={setTheme} onMenu={() => setMobileMenuOpen(true)} onNotice={setNotice} />
-        <main className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-10">
-          <AnimatePresence>
-            {notice && <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={springGentle} role="status" className="fixed right-4 top-20 z-50 flex max-w-sm items-center gap-4 rounded-2xl border border-line bg-panel px-4 py-3 text-sm text-ink shadow-xl">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')} className="ml-auto text-ink-muted hover:text-ink"><X size={15} /></button></motion.div>}
-          </AnimatePresence>
-          <Outlet context={{ user, firstName, setNotice }} />
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-[1500px] px-4 py-7 sm:px-6 lg:px-10">
+            <AnimatePresence>
+              {notice && <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={springGentle} role="status" className="fixed right-4 top-20 z-50 flex max-w-sm items-center gap-4 rounded-2xl border border-line bg-panel px-4 py-3 text-sm text-ink shadow-xl">{notice}<button type="button" aria-label="Dismiss notification" onClick={() => setNotice('')} className="ml-auto text-ink-muted hover:text-ink"><X size={15} /></button></motion.div>}
+            </AnimatePresence>
+            <Outlet context={{ user, firstName, setNotice }} />
+          </div>
         </main>
       </div>
     </div>

@@ -1,11 +1,26 @@
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AnimatePresence, motion } from 'motion/react'
-import { X } from 'lucide-react'
+import DatePicker from 'react-datepicker'
+import { CalendarDays, X } from 'lucide-react'
 import { CATEGORIES, CATEGORY_LABELS } from '../lib/finance'
 import { springGentle } from '../lib/motion'
 import { expenseSchema } from '../lib/validation'
 import GradientButton from './GradientButton'
+
+function dateFromFormValue(value) {
+  if (!value) return null
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+    ? date
+    : null
+}
+
+function dateToFormValue(date) {
+  if (!date) return ''
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
 
 function localDateToday() {
   const now = new Date()
@@ -19,7 +34,7 @@ function FieldError({ children }) {
 const fieldClass = 'mt-1.5 w-full rounded-xl border border-line bg-page px-3.5 py-3 text-sm text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10'
 
 export default function ExpenseDialog({ expense, onClose, onSave }) {
-  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({
+  const { register, control, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(expenseSchema),
     defaultValues: expense
       ? {
@@ -84,7 +99,33 @@ export default function ExpenseDialog({ expense, onClose, onSave }) {
               </label>
               <label className="text-sm font-medium text-ink-soft">
                 Date
-                <input type="date" {...register('expenseDate')} className={fieldClass} />
+                <div className="relative">
+                  <Controller
+                    name="expenseDate"
+                    control={control}
+                    render={({ field }) => (
+                      <DatePicker
+                        id="expense-date"
+                        name={field.name}
+                        selected={dateFromFormValue(field.value)}
+                        onChange={(date) => field.onChange(dateToFormValue(date))}
+                        onBlur={field.onBlur}
+                        placeholderText="Select a date"
+                        dateFormat="MMM d, yyyy"
+                        calendarClassName="fintrack-calendar"
+                        popperClassName="fintrack-date-popper"
+                        portalId="datepicker-portal"
+                        wrapperClassName="block w-full min-w-0"
+                        showPopperArrow={false}
+                        autoComplete="off"
+                        aria-label="Expense date"
+                        aria-invalid={Boolean(errors.expenseDate)}
+                        className={`${fieldClass} min-w-0 cursor-pointer pr-10`}
+                      />
+                    )}
+                  />
+                  <CalendarDays aria-hidden="true" size={17} className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-primary-600" />
+                </div>
                 <FieldError>{errors.expenseDate?.message}</FieldError>
               </label>
             </div>

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { apiRequest } from '../lib/api'
 import { useFintrackStore } from '../stores/fintrackStore'
 import AuthPage from './AuthPage'
 
@@ -9,12 +10,38 @@ export function OAuthSuccessPage() {
   const token = new URLSearchParams(window.location.hash.slice(1)).get('token')
 
   useEffect(() => {
+    let cancelled = false
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`)
-    if (token) {
-      setAuth(token, null)
-      navigate('/dashboard', { replace: true })
-    } else {
-      navigate('/login', { replace: true, state: { error: 'Google sign-in did not return an access token.' } })
+
+    const finishSignIn = async () => {
+      if (!token) {
+        navigate('/login', { replace: true, state: { error: 'Google sign-in did not return an access token.' } })
+        return
+      }
+
+      try {
+        const response = await apiRequest('/auth/me', { token })
+        if (!response?.data) {
+          throw new Error('The server did not return a user profile.')
+        }
+        if (!cancelled) {
+          setAuth(token, response.data)
+          navigate('/dashboard', { replace: true })
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setAuth(null, null)
+          navigate('/login', {
+            replace: true,
+            state: { error: error.message || 'Unable to load your Google profile.' },
+          })
+        }
+      }
+    }
+
+    finishSignIn()
+    return () => {
+      cancelled = true
     }
   }, [navigate, setAuth, token])
 

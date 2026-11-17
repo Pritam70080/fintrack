@@ -56,6 +56,7 @@ export default function AuthPage({ initialError = '' }) {
         id: response.data.userId,
         name: response.data.name,
         email: response.data.email,
+        profileImage: response.data.profileImage,
       })
       navigate('/dashboard', { replace: true })
     } catch (error) {
@@ -111,7 +112,7 @@ export default function AuthPage({ initialError = '' }) {
                 <label className="text-sm font-medium text-ink-soft">Email address<div className="relative mt-1.5"><Mail size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" /><input type="email" autoComplete="email" {...register('email')} placeholder="you@example.com" className={fieldClass} /></div><FormError>{errors.email?.message}</FormError></label>
                 <label className="text-sm font-medium text-ink-soft">Password<div className="relative mt-1.5"><LockKeyhole size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" /><input type={showPassword ? 'text' : 'password'} autoComplete={isRegister ? 'new-password' : 'current-password'} {...register('password')} placeholder={isRegister ? 'At least 8 characters' : 'Enter your password'} className={fieldClass} /><button type="button" className="absolute right-2 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-ink-muted hover:bg-panel-muted" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div><FormError>{errors.password?.message}</FormError></label>
                 {!isRegister && <p className="-mt-2 text-right text-xs text-ink-muted"><span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary-500" />Your data is private and secure</p>}
-                <GradientButton type="submit" disabled={isSubmitting} className="mt-1 w-full">{isSubmitting ? 'Please wait…' : isRegister ? 'Create account' : 'Sign in'}{!isSubmitting && <ArrowRight size={17} />}</GradientButton>
+                <GradientButton type="submit" disabled={isSubmitting} className="mt-1 w-full cursor-pointer">{isSubmitting ? 'Please wait…' : isRegister ? 'Create account' : 'Sign in'}{!isSubmitting && <ArrowRight size={17} />}</GradientButton>
               </form>
             </>
           )}
