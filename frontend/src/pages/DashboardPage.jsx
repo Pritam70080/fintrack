@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useOutletContext } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { toast } from 'sonner'
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { ArrowDownRight, ArrowRight, CalendarDays, CirclePlus, Lightbulb, Sparkles, Wallet } from 'lucide-react'
 import { useDashboardData } from '../lib/hooks/useDashboardData'
@@ -32,7 +33,8 @@ function SectionTitle({ label, title, action }) {
 }
 
 export default function DashboardPage() {
-  const { firstName, setNotice } = useOutletContext()
+  const { firstName } = useOutletContext()
+  const token = useFintrackStore((state) => state.token)
   const { createExpense } = useFintrackStore()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [now] = useState(() => new Date())
@@ -41,7 +43,7 @@ export default function DashboardPage() {
 
   const saveExpense = async (payload) => {
     await createExpense(payload)
-    setNotice('Expense added to your transactions.')
+    toast.success('Expense added to your transactions.')
   }
 
   return (
@@ -50,7 +52,9 @@ export default function DashboardPage() {
         eyebrow="YOUR MONEY, IN FOCUS"
         title={`Good ${now.getHours() < 12 ? 'morning' : now.getHours() < 18 ? 'afternoon' : 'evening'}, ${firstName}`}
         description="Here’s the story your spending is telling this month."
-        action={<GradientButton aria-label="Add expense" onClick={() => setDialogOpen(true)} className="max-sm:size-11 max-sm:px-0"><CirclePlus size={18} /><span className="max-sm:hidden">Add expense</span></GradientButton>}
+        action={token
+          ? <GradientButton aria-label="Add expense" onClick={() => setDialogOpen(true)} className="max-sm:size-11 max-sm:px-0"><CirclePlus size={18} /><span className="max-sm:hidden">Add expense</span></GradientButton>
+          : <Link to="/login" className="inline-flex min-h-11 items-center rounded-xl bg-primary-600 px-4 text-xs font-semibold text-white transition hover:bg-primary-700">Sign in to track expenses</Link>}
       />
 
       <section aria-label="Monthly spending summary" className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -82,7 +86,7 @@ export default function DashboardPage() {
         <motion.article {...entrance} className="rounded-2xl border border-line bg-panel p-5 shadow-sm sm:p-6">
           <SectionTitle label="WHERE IT GOES" title="Spending mix" />
           {data.isLoading ? <LoadingSkeleton className="mx-auto mt-6 size-48 rounded-full" /> : data.thisMonthExpenses.length === 0 ? (
-            <div className="flex min-h-64 flex-col items-center justify-center text-center"><span className="grid size-12 place-items-center rounded-2xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Lightbulb size={22} /></span><strong className="mt-4 text-sm text-ink">Your first insight awaits</strong><p className="mt-1 max-w-52 text-xs leading-5 text-ink-muted">Add an expense to see your spending mix.</p><button type="button" onClick={() => setDialogOpen(true)} className="mt-4 text-xs font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-300">Add your first expense →</button></div>
+            <div className="flex min-h-64 flex-col items-center justify-center text-center"><span className="grid size-12 place-items-center rounded-2xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Lightbulb size={22} /></span><strong className="mt-4 text-sm text-ink">Your first insight awaits</strong><p className="mt-1 max-w-52 text-xs leading-5 text-ink-muted">Add an expense to see your spending mix.</p>{token ? <button type="button" onClick={() => setDialogOpen(true)} className="mt-4 text-xs font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-300">Add your first expense →</button> : <Link to="/login" className="mt-4 text-xs font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-300">Sign in to add expenses →</Link>}</div>
           ) : <>
             <div className="relative mx-auto mt-2 h-48 max-w-xs">
               <ResponsiveContainer width="100%" height="100%">
@@ -98,7 +102,7 @@ export default function DashboardPage() {
       <motion.section {...entrance} className="rounded-2xl border border-line bg-panel p-5 shadow-sm sm:p-6">
         <SectionTitle label="THE LATEST" title="Recent transactions" action={<Link to="/expenses" className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 hover:text-primary-800 dark:text-primary-300">See all <ArrowRight size={14} /></Link>} />
         {data.isLoading ? <div className="mt-4 divide-y divide-line">{[0, 1, 2].map((item) => <div key={item} className="flex items-center gap-3 py-3"><LoadingSkeleton className="size-10 rounded-xl" /><LoadingSkeleton className="h-3 w-36" /><LoadingSkeleton className="ml-auto h-3 w-16" /></div>)}</div>
-          : data.recent.length === 0 ? <div className="flex flex-wrap items-center gap-4 border-t border-line py-5"><span className="grid size-10 place-items-center rounded-xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Wallet size={19} /></span><div className="min-w-52 flex-1"><strong className="text-sm text-ink">Nothing to see here just yet</strong><p className="mt-1 text-xs text-ink-muted">Your transactions will show up here once you add them.</p></div><button type="button" onClick={() => setDialogOpen(true)} className="text-xs font-semibold text-primary-700 dark:text-primary-300">Add an expense <ArrowRight size={13} className="inline" /></button></div>
+          : data.recent.length === 0 ? <div className="flex flex-wrap items-center gap-4 border-t border-line py-5"><span className="grid size-10 place-items-center rounded-xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Wallet size={19} /></span><div className="min-w-52 flex-1"><strong className="text-sm text-ink">Nothing to see here just yet</strong><p className="mt-1 text-xs text-ink-muted">Your transactions will show up here once you add them.</p></div>{token ? <button type="button" onClick={() => setDialogOpen(true)} className="text-xs font-semibold text-primary-700 dark:text-primary-300">Add an expense <ArrowRight size={13} className="inline" /></button> : <Link to="/login" className="text-xs font-semibold text-primary-700 dark:text-primary-300">Sign in to add expenses <ArrowRight size={13} className="inline" /></Link>}</div>
             : <div className="mt-3 divide-y divide-line">{data.recent.map((expense) => <div key={expense.id} className="flex min-h-14 items-center gap-3 py-2"><span className="grid size-10 place-items-center rounded-xl bg-primary-500/10 font-semibold text-primary-700 dark:text-primary-300">{expense.title.charAt(0).toUpperCase()}</span><div className="min-w-0 flex-1"><strong className="block truncate text-sm font-semibold text-ink">{expense.title}</strong><span className="mt-0.5 block text-xs text-ink-muted">{expense.category} · {formatDate(expense.expenseDate, { day: 'numeric', month: 'short' })}</span></div><strong className="whitespace-nowrap text-sm font-semibold text-ink">−{formatMoney(expense.amount)}</strong></div>)}</div>}
       </motion.section>
       <p className="mt-5 flex items-center justify-center gap-2 text-center text-[11px] text-ink-muted"><Sparkles size={13} className="text-primary-500" />A healthier relationship with money, one day at a time.</p>

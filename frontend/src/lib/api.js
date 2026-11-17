@@ -33,7 +33,9 @@ export async function apiRequest(path, options = {}) {
     const message = typeof body === 'object' && body !== null
       ? body.message || body.error
       : body
-    throw new Error(message || `Request failed (${response.status})`)
+    const error = new Error(message || `Request failed (${response.status})`)
+    error.status = response.status
+    throw error
   }
 
   return body

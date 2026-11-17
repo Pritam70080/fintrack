@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
+import { toast } from 'sonner'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
 import { apiRequest, oauthUrl } from '../lib/api'
 import { springGentle } from '../lib/motion'
@@ -36,7 +37,7 @@ export default function AuthPage({ initialError = '' }) {
     mode: 'onBlur',
   })
 
-  if (token && !isRegister) return <Navigate to="/dashboard" replace />
+  if (token) return <Navigate to="/dashboard" replace />
 
   const submit = async (values) => {
     setErrorMessage('')
@@ -58,6 +59,7 @@ export default function AuthPage({ initialError = '' }) {
         email: response.data.email,
         profileImage: response.data.profileImage,
       })
+      toast.success('Welcome back.')
       navigate('/dashboard', { replace: true })
     } catch (error) {
       setErrorMessage(error.message)
