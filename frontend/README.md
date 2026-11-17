@@ -11,6 +11,8 @@ npm run dev
 
 By default, Vite proxies `/api/v1` requests to `http://localhost:8000`, matching the backend's port and context path. Set `VITE_API_URL` to an absolute API base URL when connecting to a deployed backend.
 
+When deploying to Vercel, keep the project root set to `frontend`. Its `vercel.json` rewrites client-side routes to `index.html`, so refreshing a route such as `/dashboard` does not return a host-level 404.
+
 The backend must be running with its database and mail settings configured. Set `FRONTEND_URL` to the frontend's exact origin (for local development, `http://localhost:5173`) so backend CORS permits API requests and OAuth can redirect back to the app. Google sign-in also requires valid `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` values and a matching Google OAuth redirect URI for the backend's `/api/v1/login/oauth2/code/google` callback.
 
 ## Checks

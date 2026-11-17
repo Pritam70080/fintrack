@@ -5,6 +5,7 @@ import { Toaster, toast } from 'sonner'
 import { apiRequest } from './lib/api'
 import { useFintrackStore } from './stores/fintrackStore'
 import AppShell from './components/AppShell'
+import WorkspaceLoader from './components/WorkspaceLoader'
 
 const AuthPage = lazy(() => import('./pages/AuthPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
@@ -68,7 +69,7 @@ export default function App() {
       <Toaster position="top-right" richColors theme={theme} />
       <MotionConfig reducedMotion="user">
         <div className="font-sans">
-          <Suspense fallback={<div className="grid min-h-screen place-items-center bg-page text-sm text-ink-soft"><span className="flex items-center gap-3"><i className="size-5 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-600" />Loading your workspace…</span></div>}>
+          <Suspense fallback={<WorkspaceLoader />}>
             {authReady ? <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<AuthPage />} />
@@ -82,7 +83,7 @@ export default function App() {
                   <Route path="/insights" element={<InsightsPage />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes> : <div className="grid min-h-screen place-items-center bg-page text-sm text-ink-soft"><span className="flex items-center gap-3"><i className="size-5 animate-spin rounded-full border-2 border-primary-500/20 border-t-primary-600" />Loading your workspace…</span></div>}
+              </Routes> : <WorkspaceLoader />}
           </Suspense>
         </div>
       </MotionConfig>
