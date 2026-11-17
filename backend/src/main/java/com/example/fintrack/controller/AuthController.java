@@ -2,13 +2,16 @@ package com.example.fintrack.controller;
 
 import com.example.fintrack.dto.auth.LoginRequest;
 import com.example.fintrack.dto.auth.LoginResponse;
+import com.example.fintrack.dto.auth.UserProfileResponse;
 import com.example.fintrack.dto.common.ApiResponse;
 import com.example.fintrack.dto.auth.RegisterRequest;
+import com.example.fintrack.security.CustomUserDetails;
 import com.example.fintrack.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -66,6 +69,19 @@ public class AuthController {
                 )
         );
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserProfileResponse profile =
+                authService.getUserProfile(userDetails.getUserId());
+
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "User profile retrieved", profile)
+        );
+    }
+
     @GetMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout() {
 

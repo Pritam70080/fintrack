@@ -31,7 +31,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler
             oAuth2AuthenticationFailureHandler;
 
@@ -40,7 +39,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(
-            HttpSecurity http
+            HttpSecurity http,
+            OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler
     ) throws Exception {
 
         http

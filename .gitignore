@@ -5,11 +5,6 @@
 .env.*
 !.env.example
 
-# Spring Boot configuration containing secrets
-**/application-local.yml
-**/application-prod.yml
-**/application-dev.yml
-**/application.yml
 
 # ==============================
 # IntelliJ IDEA

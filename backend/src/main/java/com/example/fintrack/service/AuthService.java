@@ -3,10 +3,12 @@ package com.example.fintrack.service;
 import com.example.fintrack.dto.auth.LoginRequest;
 import com.example.fintrack.dto.auth.LoginResponse;
 import com.example.fintrack.dto.auth.RegisterRequest;
+import com.example.fintrack.dto.auth.UserProfileResponse;
 import com.example.fintrack.entity.User;
 import com.example.fintrack.enums.AuthProvider;
 import com.example.fintrack.enums.Role;
 import com.example.fintrack.exception.BadRequestException;
+import com.example.fintrack.exception.ResourceNotFoundException;
 import com.example.fintrack.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -70,27 +72,52 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .profileImage(user.getProfileImage())
                 .build();
     }
     public LoginResponse loginWithGoogle(OAuth2User oauth2User) {
 
         String email = oauth2User.getAttribute("email");
-        String name = oauth2User.getAttribute("name");
+        String googleName = oauth2User.getAttribute("name");
+        String profileImage = oauth2User.getAttribute("picture");
 
-        if (email == null) {
+        if (email == null || email.isBlank()) {
             throw new BadRequestException(
                     "Unable to retrieve email from Google"
             );
         }
 
+        if (googleName == null || googleName.isBlank()) {
+            String givenName = oauth2User.getAttribute("given_name");
+            if (givenName != null && !givenName.isBlank()) {
+                googleName = givenName;
+            } else {
+                int emailSeparator = email.indexOf('@');
+                googleName = emailSeparator > 0
+                        ? email.substring(0, emailSeparator)
+                        : email;
+            }
+        }
+        String resolvedName = googleName;
+
         User user = userRepository.findByEmail(email)
-                .orElseGet(() -> createGoogleUser(name, email));
+                .orElseGet(() -> createGoogleUser(
+                        resolvedName,
+                        email,
+                        profileImage
+                ));
 
         if (user.getProvider() != AuthProvider.GOOGLE) {
             throw new BadRequestException(
                     "An account already exists with this email. " +
                             "Please login using email and password."
             );
+        }
+
+        if (profileImage != null
+                && !profileImage.equals(user.getProfileImage())) {
+            user.setProfileImage(profileImage);
+            userRepository.save(user);
         }
 
         String accessToken = jwtService.generateToken(user);
@@ -102,16 +129,35 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole().name())
+                .profileImage(user.getProfileImage())
                 .build();
     }
+
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found with id: " + userId
+                ));
+
+        return UserProfileResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .profileImage(user.getProfileImage())
+                .build();
+    }
+
     private User createGoogleUser(
             String name,
-            String email
+            String email,
+            String profileImage
     ) {
 
         User user = User.builder()
                 .name(name)
                 .email(email)
+                .profileImage(profileImage)
                 .password(null)
                 .role(Role.USER)
                 .provider(AuthProvider.GOOGLE)
