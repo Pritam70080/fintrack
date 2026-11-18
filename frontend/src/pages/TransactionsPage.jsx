@@ -59,13 +59,20 @@ export default function TransactionsPage() {
 
       <section className="overflow-hidden rounded-2xl border border-line bg-panel shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line p-4">
-          <label className="flex h-10 min-w-48 flex-1 items-center gap-2 rounded-xl border border-line bg-page px-3 text-ink-muted sm:max-w-xs"><Search size={16} /><input value={search} onChange={(event) => setParams(event.target.value ? { search: event.target.value } : {})} placeholder="Search transactions..." aria-label="Search transactions" className="w-full bg-transparent text-xs text-ink outline-none placeholder:text-ink-muted" /></label>
-          <div className="flex flex-1 items-center justify-end gap-2">
+          <label className="flex h-10 min-w-0 basis-full items-center gap-2 rounded-xl border border-line bg-page px-3 text-ink-muted sm:min-w-48 sm:flex-1 sm:basis-auto sm:max-w-xs"><Search size={16} /><input value={search} onChange={(event) => setParams(event.target.value ? { search: event.target.value } : {})} placeholder="Search transactions..." aria-label="Search transactions" className="w-full bg-transparent text-xs text-ink outline-none placeholder:text-ink-muted" /></label>
+          <div className="flex w-full flex-1 items-center justify-end gap-2 sm:w-auto">
             <label className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-line bg-panel px-3 text-ink-soft sm:flex-none"><SlidersHorizontal size={15} /><select value={category} onChange={(event) => setCategory(event.target.value)} aria-label="Filter by category" className="min-w-0 flex-1 bg-transparent text-xs outline-none sm:w-32 sm:flex-none"><option value="ALL">All categories</option>{CATEGORIES.map((item) => <option value={item} key={item}>{CATEGORY_LABELS[item]}</option>)}</select></label>
-            <button type="button" onClick={() => { downloadCsv('fintrack-transactions.csv', ['Title', 'Amount', 'Category', 'Date', 'Note'], exportRows); toast.success('Transactions exported.') }} disabled={filtered.length === 0} className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-3 text-xs font-medium text-ink-soft transition hover:bg-panel-muted disabled:opacity-40"><Download size={15} /><span className="max-sm:hidden">Export</span></button>
+            <button 
+            type="button" 
+            onClick={() => { downloadCsv('fintrack-transactions.csv', ['Title', 'Amount', 'Category', 'Date', 'Note'], exportRows); toast.success('Transactions exported.') }} 
+            disabled={filtered.length === 0} 
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-line px-3 text-xs font-medium text-ink-soft transition hover:bg-panel-muted disabled:opacity-40">
+              <Download size={15} />
+              <span className="max-sm:hidden">Export</span>
+            </button>
           </div>
         </div>
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto sm:block">
           <table className="w-full min-w-[690px] border-collapse text-left">
             <thead className="bg-page text-[10px] font-bold tracking-wider text-ink-muted"><tr><th className="px-5 py-3">TRANSACTION</th><th className="px-3 py-3">CATEGORY</th><th className="px-3 py-3">DATE</th><th className="px-3 py-3 text-right">AMOUNT</th><th className="px-5 py-3"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody className="divide-y divide-line">
@@ -79,6 +86,22 @@ export default function TransactionsPage() {
                 </tr>)}
             </tbody>
           </table>
+          {!isLoading && filtered.length === 0 && <div className="flex min-h-56 flex-col items-center justify-center px-4 text-center"><span className="grid size-11 place-items-center rounded-2xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Search size={20} /></span><strong className="mt-3 text-sm text-ink">{search || category !== 'ALL' ? 'No matching transactions' : 'Your story starts here'}</strong><p className="mt-1 max-w-xs text-xs leading-5 text-ink-muted">{search || category !== 'ALL' ? 'Try adjusting your search or filters.' : 'Add your first expense and start seeing the bigger picture.'}</p>{!search && category === 'ALL' && (token ? <button type="button" onClick={() => setDialog({})} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-700 dark:text-primary-300">Add an expense <ArrowRight size={14} /></button> : <Link to="/login" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-700 dark:text-primary-300">Sign in to add expenses <ArrowRight size={14} /></Link>)}</div>}
+        </div>
+        <div className="divide-y divide-line sm:hidden">
+          {isLoading ? [0, 1, 2, 3].map((item) => <div key={item} className="flex items-center gap-3 px-4 py-4"><LoadingSkeleton className="size-10 shrink-0 rounded-xl" /><div className="grid flex-1 gap-2"><LoadingSkeleton className="h-3 w-32" /><LoadingSkeleton className="h-3 w-24" /></div><LoadingSkeleton className="h-3 w-16" /></div>)
+            : filtered.map((expense) => <div key={expense.id} className="flex min-w-0 items-center gap-3 px-4 py-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-500/10 font-semibold text-primary-700 dark:text-primary-300">{expense.title.charAt(0).toUpperCase()}</span>
+              <div className="min-w-0 flex-1">
+                <strong className="block truncate text-xs font-semibold text-ink">{expense.title}</strong>
+                <span className="mt-1 block truncate text-[10px] text-ink-muted">{CATEGORY_LABELS[expense.category] || 'Other'} · {formatDate(expense.expenseDate)}</span>
+                {expense.description && <small className="mt-0.5 block truncate text-[10px] text-ink-muted">{expense.description}</small>}
+              </div>
+              <div className="shrink-0 text-right">
+                <strong className="block whitespace-nowrap text-xs font-semibold text-ink">−{formatMoney(expense.amount)}</strong>
+                {token && <div className="mt-1 flex justify-end gap-2"><button type="button" onClick={() => setDialog({ expense })} className="text-[10px] font-medium text-ink-soft">Edit</button><button type="button" aria-label={`Delete ${expense.title}`} onClick={() => remove(expense)} className="text-[10px] font-medium text-red-600 dark:text-red-400">Delete</button></div>}
+              </div>
+            </div>)}
           {!isLoading && filtered.length === 0 && <div className="flex min-h-56 flex-col items-center justify-center px-4 text-center"><span className="grid size-11 place-items-center rounded-2xl bg-primary-500/10 text-primary-700 dark:text-primary-300"><Search size={20} /></span><strong className="mt-3 text-sm text-ink">{search || category !== 'ALL' ? 'No matching transactions' : 'Your story starts here'}</strong><p className="mt-1 max-w-xs text-xs leading-5 text-ink-muted">{search || category !== 'ALL' ? 'Try adjusting your search or filters.' : 'Add your first expense and start seeing the bigger picture.'}</p>{!search && category === 'ALL' && (token ? <button type="button" onClick={() => setDialog({})} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-700 dark:text-primary-300">Add an expense <ArrowRight size={14} /></button> : <Link to="/login" className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-700 dark:text-primary-300">Sign in to add expenses <ArrowRight size={14} /></Link>)}</div>}
         </div>
         <div className="flex min-h-12 items-center justify-between gap-3 border-t border-line px-4 text-[10px] text-ink-muted"><span>Showing {filtered.length} of {expenses.length} transactions</span><button type="button" onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')} className="inline-flex items-center gap-1.5 text-ink-soft">Date: {sortOrder === 'newest' ? 'newest first' : 'oldest first'} <ArrowDownUp size={13} /></button></div>

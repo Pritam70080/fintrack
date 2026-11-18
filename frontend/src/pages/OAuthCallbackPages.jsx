@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { apiRequest } from '../lib/api'
 import { useFintrackStore } from '../stores/fintrackStore'
-import AuthPage from './AuthPage'
 
 export function OAuthSuccessPage() {
   const navigate = useNavigate()
@@ -15,7 +15,8 @@ export function OAuthSuccessPage() {
 
     const finishSignIn = async () => {
       if (!token) {
-        navigate('/login', { replace: true, state: { error: 'Google sign-in did not return an access token.' } })
+        toast.error('Google sign-in did not return an access token.')
+        navigate('/login', { replace: true })
         return
       }
 
@@ -31,10 +32,8 @@ export function OAuthSuccessPage() {
       } catch (error) {
         if (!cancelled) {
           setAuth(null, null)
-          navigate('/login', {
-            replace: true,
-            state: { error: error.message || 'Unable to load your Google profile.' },
-          })
+          toast.error(error.message || 'Unable to load your Google profile.')
+          navigate('/login', { replace: true })
         }
       }
     }
@@ -50,5 +49,8 @@ export function OAuthSuccessPage() {
 
 export function OAuthErrorPage() {
   const [params] = useSearchParams()
-  return <AuthPage initialError={params.get('message') || 'Google sign-in could not be completed.'} />
+  useEffect(() => {
+    toast.error(params.get('message') || 'Google sign-in could not be completed.')
+  }, [params])
+  return <Navigate to="/login" replace />
 }

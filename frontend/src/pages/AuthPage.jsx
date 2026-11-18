@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles, UserRound } from 'lucide-react'
@@ -22,14 +22,13 @@ function FormError({ children }) {
 
 const fieldClass = 'mt-1.5 w-full rounded-xl border border-line bg-page py-3 pl-10 pr-10 text-sm text-ink outline-none transition placeholder:text-ink-muted focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10'
 
-export default function AuthPage({ initialError = '' }) {
+export default function AuthPage() {
   const isRegister = window.location.pathname === '/register'
   const navigate = useNavigate()
-  const location = useLocation()
   const token = useFintrackStore((state) => state.token)
   const setAuth = useFintrackStore((state) => state.setAuth)
   const [showPassword, setShowPassword] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(initialError || location.state?.error || '')
+  const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(isRegister ? registerSchema : loginSchema),
